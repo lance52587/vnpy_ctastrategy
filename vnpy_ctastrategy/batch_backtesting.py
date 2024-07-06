@@ -137,10 +137,14 @@ class BatchBackTest:
             print('para_dict format not supported')
             return
         print(f'stra_setting:')
-        # 逐一打印
         for k, v in stra_setting.items():
             print(f'{k}: {v}')
+
         self.agg_by = agg_by
+        if agg_by not in ('class_name', 'vt_symbol', 'setting', 'all'):
+            print('not supported agg_by')
+            return
+
         self.run_batch_test(stra_setting, start_date, end_date)
         self.daily_view()
         self.save_result()
@@ -155,11 +159,15 @@ class BatchBackTest:
 
             # 资产组合回测结果
             port_result = pd.DataFrame.from_dict(self.port_stats, orient='index')
-            port_result.to_excel(excel_writer, sheet_name='port_stats', index=False)
-            for k, v in self.port_pnl.items():
-                v.to_excel(excel_writer, sheet_name=f'port_{k}')
+            port_result.reset_index(drop=True).to_excel(excel_writer, sheet_name='port_stats')
+            for n, (k, v) in enumerate(self.port_pnl.items()):
+                if self.agg_by != 'setting':
+                    sheet_name = f'port_{k}'
+                else:
+                    sheet_name = f'port_{n}'
+                v.to_excel(excel_writer, sheet_name=sheet_name)
                 fig = self.show_chart(v)
-                pio.write_html(fig, file=f'{self.export}port_{k}.html', auto_open=False)
+                pio.write_html(fig, file=f'{self.export}{sheet_name}.html', auto_open=False)
 
             # 单品种回测结果
             result = pd.DataFrame.from_dict(self.stats, orient='index')
@@ -179,16 +187,11 @@ class BatchBackTest:
         按所选视图方式，分类daily_df
         """
         agg_by = self.agg_by
-        if agg_by not in ('class_name', 'vt_symbol', 'setting', 'all'):
-            print('not supported agg_by')
-            return
-
         # 拿到unique的by值，将同一类的策略dail_df汇总
         if agg_by == 'all':
             unique_by = ['all']
         else:
             unique_by = list(set([v[agg_by] for v in self.stats.values()]))
-
             
         self.daily_df_d = {}
         if agg_by == 'all':
@@ -239,4 +242,4 @@ class BatchBackTest:
 
 if __name__ == '__main__':
     bts = BatchBackTest()
-    bts.run_batch_test_file(agg_by='class_name')
+    bts.run_batch_test_file(agg_by='all')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
