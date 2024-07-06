@@ -404,9 +404,10 @@ class BacktestingEngine:
                 df["ewm_sharpe"]: Series = (ewm_mean - daily_risk_free) / ewm_std * np.sqrt(self.annual_days)
                 ewm_sharpe: float = df["ewm_sharpe"].values[-1]
 
-                ewm_sortino_window: ExponentialMovingWindow = downside_return.ewm(halflife=self.half_life)
-                ewm_sortino_mean: Series = ewm_sortino_window.mean() * 100
-                downside_deviation: Series = np.sqrt(np.mean(np.square(downside_return))) * 100
+                squared_downside_return: Series = np.square(downside_return)
+                ewm_squared_downside_return_window: ExponentialMovingWindow = squared_downside_return.ewm(halflife=self.half_life)
+                ewm_squared_downside_return_mean: Series = ewm_squared_downside_return_window.mean()
+                downside_deviation: Series = np.sqrt(ewm_squared_downside_return_mean) * 100
                 df["ewm_sortino"]: Series = (ewm_mean - daily_risk_free) / downside_deviation * np.sqrt(self.annual_days)
                 ewm_sortino: float = df["ewm_sortino"].values[-1]
             else:
