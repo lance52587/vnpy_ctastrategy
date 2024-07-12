@@ -3,7 +3,6 @@ import json, os
 import traceback
 from collections import defaultdict
 from datetime import datetime, date
-from multiprocessing import Manager
 from pathlib import Path
 from types import MethodType
 import plotly.io as pio
@@ -11,7 +10,6 @@ from pathos.multiprocessing import ProcessPool
 import dill
 
 dill.settings['recurse'] = True
-# dill.settings['byref'] = True
 import pandas as pd
 from vnpy.trader.utility import load_json, get_file_path
 from vnpy.utils.symbol_info import all_priceticks, illiquid_symbol, all_sizes, dbsymbols, all_symbol_pres_rev
@@ -170,69 +168,6 @@ class BatchBackTest:
                 self.stats[_name] = stat
                 self.daily_dfs[_name] = df
 
-
-    def run_concurrent_test1(self, stra_setting, start_date, end_date):
-        """
-        进行回测
-        """
-
-        stra_setting_vtsymbol = defaultdict(list)
-        for _name, _config in stra_setting.items():
-            vt_symbol = _config["vt_symbol"]
-            stra_setting_vtsymbol[vt_symbol].append((_name, _config))
-
-        # 初始化并加载数据到共享内存
-        with Manager() as manager:
-
-            shared_data = manager.dict()
-
-            def load_data_to_shared_memory(vt_symbol, stra_setting_vt, start_date, end_date):
-                """
-                加载数据并保存到共享内存
-                """
-                engine = BacktestingEngine()
-                engine = self.add_parameters(engine, vt_symbol, start_date, end_date)
-                engine.load_data()
-                return engine.history_data
-
-            with ProcessPool() as load_pool:
-                load_tasks = load_pool.map(lambda x: load_data_to_shared_memory(*x),
-                                             [(vt_symbol, stra_setting_vt[0], start_date, end_date)
-                                              for vt_symbol, stra_setting_vt in stra_setting_vtsymbol.items()])
-                for vt_symbol, data in zip(stra_setting_vtsymbol.keys(), load_tasks):
-                    shared_data[vt_symbol] = data
-
-            # （多标的多参数）多进程回测：每个engine的history_data使用shared_data共享内存中的数据
-            engines = {}
-            for vt_symbol, stra_setting_vt in stra_setting_vtsymbol.items():
-                for _name, _config in stra_setting_vt:
-                    _setting = json.loads(_config["setting"]) if type(_config["setting"]) is str else _config["setting"]
-                    engine = BacktestingEngine()
-                    engine = self.add_parameters(engine, vt_symbol, start_date, end_date)
-                    engine.history_data = shared_data[vt_symbol]
-                    engine.add_strategy(self.classes.get(_config["class_name"]), _setting)
-                    engines[_name] = [vt_symbol, engine, _config["class_name"], _setting]
-
-            def run_single_backtesting(name, value):
-                value[1].run_backtesting()
-                value[1].calculate_result()
-                stat = value[1].calculate_statistics(output=False)
-                df = value[1].daily_df
-                stat["class_name"] = value[2]
-                stat["setting"] = str(value[3])
-                stat["vt_symbol"] = value[0]
-                stat['strategy_name'] = name
-                return name, stat, df
-
-            with ProcessPool() as pool:
-                results = pool.map(lambda x: run_single_backtesting(*x), engines.items())
-
-            # 整理结果
-            for result in results:
-                _name, stat, df = result
-                self.stats[_name] = stat
-                self.daily_dfs[_name] = df
-
     def run_batch_test_file(self, para_dict="cta_strategy.xlsx", start_date=datetime(2024, 5, 1),
                          end_date=datetime(2024, 12, 1), agg_by='class_name'):
         """
@@ -257,8 +192,7 @@ class BatchBackTest:
             return
 
         # self.run_batch_test(stra_setting, start_date, end_date)
-        # self.run_concurrent_test(stra_setting, start_date, end_date)
-        self.run_concurrent_test1(stra_setting, start_date, end_date)
+        self.run_concurrent_test(stra_setting, start_date, end_date)
         self.daily_view()
         self.save_result()
 
@@ -354,7 +288,5 @@ class BatchBackTest:
 
 
 if __name__ == '__main__':
-    starttime = datetime.now()
     bts = BatchBackTest()
     bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
-    print(f'BatchBackTest cost time: {datetime.now() - starttime}')
