@@ -6,7 +6,10 @@ from datetime import datetime, date
 from pathlib import Path
 from types import MethodType
 import plotly.io as pio
+from pathos.multiprocessing import ProcessPool
+import dill
 
+dill.settings['recurse'] = True
 import pandas as pd
 from vnpy.trader.utility import load_json, get_file_path
 from vnpy.utils.symbol_info import all_priceticks, illiquid_symbol, all_sizes, dbsymbols, all_symbol_pres_rev
@@ -100,7 +103,6 @@ class BatchBackTest:
             vt_symbol = _config["vt_symbol"]
             stra_setting_vtsymbol[vt_symbol].append((_name, _config))
 
-        # todo: 并行回测
         for vt_symbol, stra_setting_vt in stra_setting_vtsymbol.items():
             engine = BacktestingEngine()
             engine = self.add_parameters(engine, vt_symbol, start_date, end_date)
@@ -121,6 +123,50 @@ class BatchBackTest:
                 self.daily_dfs[_name] = df
                 engine.clear_data()
 
+    def run_single_test(self, vt_symbol, stra_setting_vt, start_date, end_date):
+        """
+        单个品种的回测任务
+        """
+        engine = BacktestingEngine()
+        engine = self.add_parameters(engine, vt_symbol, start_date, end_date)
+        engine.load_data()
+        results = []
+        for _name, _config in stra_setting_vt:
+            _setting = json.loads(_config["setting"]) if isinstance(_config["setting"], str) else _config["setting"]
+            engine.add_strategy(self.classes.get(_config["class_name"]), _setting)
+            engine.run_backtesting()
+            engine.calculate_result()
+            stat = engine.calculate_statistics(output=False)
+            df = engine.daily_df
+            stat["class_name"] = _config["class_name"]
+            stat["setting"] = str(_setting)
+            stat["vt_symbol"] = vt_symbol
+            stat['strategy_name'] = _name
+            results.append((_name, stat, df))
+            engine.clear_data()
+        return results
+
+    def run_concurrent_test(self, stra_setting, start_date, end_date):
+        """
+        进行回测
+        """
+        # 单品种只加载一次历史数据：每个品种只实例化一个engine，回测完后clear_data，再回测该品种下一个策略配置
+        stra_setting_vtsymbol = defaultdict(list)
+        for _name, _config in stra_setting.items():
+            vt_symbol = _config["vt_symbol"]
+            stra_setting_vtsymbol[vt_symbol].append((_name, _config))
+
+        # 并行回测
+        with ProcessPool() as pool:
+            results = pool.map(lambda x: self.run_single_test(*x),
+                               [(vt_symbol, stra_setting_vt, start_date, end_date)
+                                for vt_symbol, stra_setting_vt in stra_setting_vtsymbol.items()])
+
+        # 整理结果
+        for result in results:
+            for _name, stat, df in result:
+                self.stats[_name] = stat
+                self.daily_dfs[_name] = df
 
     def run_batch_test_file(self, para_dict="cta_strategy.xlsx", start_date=datetime(2024, 5, 1),
                          end_date=datetime(2024, 12, 1), agg_by='class_name'):
@@ -145,7 +191,8 @@ class BatchBackTest:
             print('not supported agg_by')
             return
 
-        self.run_batch_test(stra_setting, start_date, end_date)
+        # self.run_batch_test(stra_setting, start_date, end_date)
+        self.run_concurrent_test(stra_setting, start_date, end_date)
         self.daily_view()
         self.save_result()
 
@@ -242,4 +289,4 @@ class BatchBackTest:
 
 if __name__ == '__main__':
     bts = BatchBackTest()
-    bts.run_batch_test_file(agg_by='all')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
+    bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
