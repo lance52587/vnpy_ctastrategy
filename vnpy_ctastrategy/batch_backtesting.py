@@ -23,21 +23,21 @@ class BatchBackTest:
     提供批量CTA策略回测，输出结果到excel或pdf，和CTA策略批量优化，输出结果到excel或pdf，
     """
 
-    def __init__(self, config_file="vt_symbol.json", export="result"):
+    def __init__(self, para_file="vt_symbol.json", export="result"):
         """
         加载配置路径
         """
         # 先用默认参数，后续再从配置文件读取进行更新
-        self.setting = self.default_parameters()
-        if os.path.exists(get_file_path(config_file)):
-            _setting = load_json(config_file)
-            for k, v in _setting.items():
-                if k in self.setting:
-                    print(f"symbol {k} para update from\n{self.setting[k]}\nto\n{v}\n")
-                    self.setting[k].update(v)
+        self.paras = self.default_parameters()
+        if os.path.exists(get_file_path(para_file)):
+            para = load_json(para_file)
+            for k, v in para.items():
+                if k in self.paras:
+                    print(f"symbol {k} para update from\n{self.paras[k]}\nto\n{v}\n")
+                    self.paras[k].update(v)
                 else:
                     print(f"symbol {k} para added\n{v}\n")
-                    self.setting[k] = v
+                    self.paras[k] = v
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.export = os.path.join(export, timestamp) + os.sep
@@ -62,41 +62,57 @@ class BatchBackTest:
         print(msg)
 
     def default_parameters(self, symbols=dbsymbols, standard=1):
-        setting = {}
+        para = {}
         # 期货品种
         for symbol in symbols:
             if symbol not in illiquid_symbol:
                 vt_symbol = f"{symbol}.{all_symbol_pres_rev.get(symbol, 'LOCAL')}"
-                setting[vt_symbol] = {
+                para[vt_symbol] = {
                     "rate": 2.5e-5 if standard == 1 else 0.,
                     "slippage": 2 * all_priceticks[symbol] if standard == 1 else 0.,
                     "size": all_sizes[symbol],
                     "pricetick": all_priceticks[symbol]
                 }
-        return setting
+
+        # todo: 默认币的配置价格跳动和合约大小，而非要求用户配置在vt_symbol.json中
+
+        # 股票品种
+        for exchange in ('SSE', 'SZSE', 'BSE'):
+            para[exchange] = {
+                "rate": 8.5e-5 if standard == 1 else 0.,
+                "slippage": 0.02 if standard == 1 else 0.,
+                "size": 100,
+                "pricetick": 0.02
+            }
+        return para
 
     def add_parameters(self, engine, vt_symbol: str, start_date, end_date, interval="1m", capital=None):
         """
         从vtSymbol.json文档读取品种的交易属性，比如费率，交易每跳，比率，滑点
         """
-        # todo: 如果交易所是股票交易所或者币所，使用股票或币统一的参数，不再使用品种的参数
-        config_vt_symbol, exchange = vt_symbol.rsplit(".", 1)
-        config_vt_symbol = f"{config_vt_symbol.strip('0123456789')}.{exchange}"
-        if vt_symbol in self.setting or config_vt_symbol in self.setting:
-            _vt_symbol = vt_symbol if vt_symbol in self.setting else config_vt_symbol
+        symbol, exchange = vt_symbol.rsplit(".", 1)
+        if exchange in ('SHFE', 'CFFEX', 'DCE', 'CZCE'):
+            default_vt_symbol = f"{symbol.strip('0123456789')}.{exchange}"
+        elif exchange in ('SSE', 'SZSE', 'BSE'):
+            default_vt_symbol = f"{exchange}"
+        else:
+            default_vt_symbol = vt_symbol
+        
+        if vt_symbol in self.paras or default_vt_symbol in self.paras:
+            _vt_symbol = vt_symbol if vt_symbol in self.paras else default_vt_symbol
             engine.set_parameters(
                 vt_symbol=vt_symbol,
                 interval=interval,
                 start=start_date,
                 end=end_date,
-                rate=self.setting[_vt_symbol]["rate"],
-                slippage=self.setting[_vt_symbol]["slippage"],
-                size=self.setting[_vt_symbol]["size"],
-                pricetick=self.setting[_vt_symbol]["pricetick"],
+                rate=self.paras[_vt_symbol]["rate"],
+                slippage=self.paras[_vt_symbol]["slippage"],
+                size=self.paras[_vt_symbol]["size"],
+                pricetick=self.paras[_vt_symbol]["pricetick"],
                 capital=self.capital if capital is None else capital
             )
         else:
-            print(f"symbol {vt_symbol} hasn't be maintained in config file")
+            print(f"{vt_symbol} parameter hasn't be maintained in para file")
         return engine
 
 
