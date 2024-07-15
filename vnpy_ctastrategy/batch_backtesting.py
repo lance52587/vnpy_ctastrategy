@@ -233,12 +233,11 @@ class BatchBackTest:
                 engine.daily_df = df
                 # stats：使用df进行计算
                 stat = engine.calculate_statistics(output=False)
-                df = engine.daily_df
                 stat['name'] = name
                 self.stats[name] = stat
 
                 # daily_dfs
-                self.daily_dfs[name] = df
+                self.daily_dfs[name] = engine.daily_df
         self.daily_view()
         self.save_result()
 
