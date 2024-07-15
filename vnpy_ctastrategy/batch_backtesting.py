@@ -63,6 +63,7 @@ class BatchBackTest:
 
     def default_parameters(self, symbols=dbsymbols, standard=1):
         setting = {}
+        # 期货品种
         for symbol in symbols:
             if symbol not in illiquid_symbol:
                 vt_symbol = f"{symbol}.{all_symbol_pres_rev.get(symbol, 'LOCAL')}"
@@ -78,6 +79,7 @@ class BatchBackTest:
         """
         从vtSymbol.json文档读取品种的交易属性，比如费率，交易每跳，比率，滑点
         """
+        # todo: 如果交易所是股票交易所或者币所，使用股票或币统一的参数，不再使用品种的参数
         config_vt_symbol, exchange = vt_symbol.rsplit(".", 1)
         config_vt_symbol = f"{config_vt_symbol.strip('0123456789')}.{exchange}"
         if vt_symbol in self.setting or config_vt_symbol in self.setting:
@@ -201,11 +203,14 @@ class BatchBackTest:
         self.daily_view()
         self.save_result()
 
-    # 增加直接从指定文件夹读取各单品种回测结果.xlsx到daily_dfs，并进行daily_view和save_result
-    def summary_result_from_folder(self, folder='outer_result'):
+
+    def summary_result_from_folder(self, folder=None):
         """
         从指定文件夹读取各单品种回测结果.xlsx到daily_dfs，并进行daily_view和save_result
         """
+        if folder is None:
+            folder = os.getcwd()
+
         self.daily_dfs = {}
         for file in glob(f'{folder}/*.xlsx'):
             df = pd.read_excel(file)
@@ -238,6 +243,11 @@ class BatchBackTest:
             result = pd.DataFrame.from_dict(self.stats, orient='index')
             result.to_excel(excel_writer, sheet_name='stats', index=False)
             for k, v in self.daily_dfs.items():
+                # 如果没有balance列，将net_pnl累加得到balance列
+                if 'balance' not in v.columns:
+                    v['balance'] = v['net_pnl'].cumsum() + self.capital
+                    v["highlevel"] = v["balance"].expanding().max()
+                    v["drawdown"] = v["balance"] - v["highlevel"]
                 v.to_excel(excel_writer, sheet_name=str(k))
                 fig = self.show_chart(v)
                 pio.write_html(fig, file=f'{self.export}{k}.html', auto_open=False)
@@ -271,7 +281,7 @@ class BatchBackTest:
         if daily_df_d is None:
             daily_df_d = self.daily_df_d
 
-        columns = ['date', 'balance', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count']
+        columns = ['date', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count']
         for k, v in daily_df_d.items():
             port_pnl = pd.DataFrame()
             for _k, _v in v.items():
@@ -281,11 +291,8 @@ class BatchBackTest:
                     port_pnl = _v.reset_index()[columns]
                 else:
                     port_pnl = port_pnl.merge(_v.reset_index()[columns], on='date', how='outer').sort_values(by='date')
-                    port_pnl['balance_x'] = port_pnl['balance_x'].fillna(method='ffill').fillna(self.capital)
-                    port_pnl['balance_y'] = port_pnl['balance_y'].fillna(method='ffill').fillna(self.capital)
                     port_pnl.fillna(0, inplace=True)
 
-                    port_pnl['balance'] = port_pnl['balance_x'] + port_pnl['balance_y']
                     port_pnl['net_pnl'] = port_pnl['net_pnl_x'] + port_pnl['net_pnl_y']
                     port_pnl['commission'] = port_pnl['commission_x'] + port_pnl['commission_y']
                     port_pnl['slippage'] = port_pnl['slippage_x'] + port_pnl['slippage_y']
@@ -294,7 +301,6 @@ class BatchBackTest:
                     port_pnl = port_pnl[columns]
 
             # 统计资产组合pnl
-            port_pnl['drawdown'] = port_pnl['balance'] - port_pnl['balance'].expanding().max()
             port_pnl.set_index('date', inplace=True)  # 将排序后的date列设置为索引
 
             engine = BacktestingEngine()
@@ -308,6 +314,6 @@ class BatchBackTest:
 
 if __name__ == '__main__':
     bts = BatchBackTest()
-    bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
+    # bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
 
-    # bts.summary_result_from_folder('outer_result')
+    bts.summary_result_from_folder('outer_result')
