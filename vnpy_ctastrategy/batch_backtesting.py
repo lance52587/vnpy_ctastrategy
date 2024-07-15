@@ -7,6 +7,7 @@ from pathlib import Path
 from types import MethodType
 import plotly.io as pio
 from pathos.multiprocessing import ProcessPool
+from glob import glob
 import dill
 
 dill.settings['recurse'] = True
@@ -53,6 +54,7 @@ class BatchBackTest:
         self.show_chart = MethodType(BacktestingEngine.show_chart, self)
 
         self.capital = 1_000_000
+        self.agg_by = 'all'
         self.port_pnl = {}
         self.port_stats = {}
 
@@ -172,7 +174,7 @@ class BatchBackTest:
                 self.daily_dfs[_name] = df
 
     def run_batch_test_file(self, para_dict="cta_strategy.xlsx", start_date=datetime(2024, 5, 1),
-                         end_date=datetime(2024, 12, 1), agg_by='class_name'):
+                         end_date=datetime(2024, 12, 1), agg_by='all'):
         """
         从ctaStrategy.json去读交易策略和参数，进行回测
         """
@@ -198,6 +200,19 @@ class BatchBackTest:
         self.run_concurrent_test(stra_setting, start_date, end_date)
         self.daily_view()
         self.save_result()
+
+    # 增加直接从指定文件夹读取各单品种回测结果.xlsx到daily_dfs，并进行daily_view和save_result
+    def summary_result_from_folder(self, folder='outer_result'):
+        """
+        从指定文件夹读取各单品种回测结果.xlsx到daily_dfs，并进行daily_view和save_result
+        """
+        self.daily_dfs = {}
+        for file in glob(f'{folder}/*.xlsx'):
+            df = pd.read_excel(file)
+            self.daily_dfs[os.path.basename(file).rsplit('.', 1)[0]] = df
+        self.daily_view()
+        self.save_result()
+
 
     def save_result(self):
         """
@@ -237,31 +252,29 @@ class BatchBackTest:
         按所选视图方式，分类daily_df
         """
         agg_by = self.agg_by
-        # 拿到unique的by值，将同一类的策略dail_df汇总
-        if agg_by == 'all':
-            unique_by = ['all']
-        else:
-            unique_by = list(set([v[agg_by] for v in self.stats.values()]))
-            
         self.daily_df_d = {}
         if agg_by == 'all':
             self.daily_df_d['all'] = self.daily_dfs
         else:
+            # 拿到unique的by值，将同一类的策略dail_df汇总
+            unique_by = list(set([v[agg_by] for v in self.stats.values()]))
             for ub in unique_by:
                 self.daily_df_d[ub] = {k: v for k, v in self.daily_dfs.items() if self.stats[k][agg_by] == ub}
 
         # 汇总daily_df
         self.agg_daily_view()
 
-    def agg_daily_view(self):
+    def agg_daily_view(self, daily_df_d=None):
         """
         将daily_df_d每个k下的v逐一merge，生成各k下的port_pnl，并engine.calculate_statistics(port_pnl)
         """
+        if daily_df_d is None:
+            daily_df_d = self.daily_df_d
+
         columns = ['date', 'balance', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count']
-        for k, v in self.daily_df_d.items():
+        for k, v in daily_df_d.items():
             port_pnl = pd.DataFrame()
             for _k, _v in v.items():
-                # 对_v为NoneType时报错has no attribute reset_index的处理
                 if _v is None:
                     continue
                 if port_pnl.empty:
@@ -296,3 +309,5 @@ class BatchBackTest:
 if __name__ == '__main__':
     bts = BatchBackTest()
     bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
+
+    # bts.summary_result_from_folder('outer_result')
