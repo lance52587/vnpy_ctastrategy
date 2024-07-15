@@ -39,7 +39,7 @@ class BatchBackTest:
                     self.setting[k] = v
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        self.export = export + "\\" + timestamp + "\\"
+        self.export = os.path.join(export, timestamp) + os.sep
         os.makedirs(self.export, exist_ok=True)
 
         self.classes = {}
