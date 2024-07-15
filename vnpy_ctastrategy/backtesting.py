@@ -314,6 +314,7 @@ class BacktestingEngine:
         daily_slippage: float = 0
         total_turnover: float = 0
         daily_turnover: float = 0
+        turnover_mul: float = 0
         total_trade_count: int = 0
         daily_trade_count: int = 0
         total_return: float = 0
@@ -342,6 +343,8 @@ class BacktestingEngine:
 
             df["highlevel"] = df["balance"].expanding().max()
             df["drawdown"] = df["balance"] - df["highlevel"]
+            if "end_holding" not in df.columns:
+                df['end_holding'] = (df['end_pos'] * df['close_price'] * self.size).abs()
             df["ddpercent"] = df["drawdown"] / df["highlevel"] * 100
 
             # All balance value needs to be positive
@@ -381,6 +384,7 @@ class BacktestingEngine:
 
             total_turnover: float = df["turnover"].sum()
             daily_turnover: float = total_turnover / total_days
+            turnover_mul = daily_turnover / df['end_holding'].mean() * 252
 
             total_trade_count: int = df["trade_count"].sum()
             daily_trade_count: int = total_trade_count / total_days
@@ -445,6 +449,7 @@ class BacktestingEngine:
             self.output(f"总手续费：\t{total_commission:,.2f}")
             self.output(f"总滑点：\t{total_slippage:,.2f}")
             self.output(f"总成交金额：\t{total_turnover:,.2f}")
+            self.output(f'年化换手倍数：\t{turnover_mul:,.2f}')
             self.output(f"总成交笔数：\t{total_trade_count}")
 
             self.output(f"日均盈亏：\t{daily_net_pnl:,.2f}")
@@ -480,6 +485,7 @@ class BacktestingEngine:
             "daily_slippage": daily_slippage,
             "total_turnover": total_turnover,
             "daily_turnover": daily_turnover,
+            "turnover_mul": turnover_mul,
             "total_trade_count": total_trade_count,
             "daily_trade_count": daily_trade_count,
             "total_return": total_return,

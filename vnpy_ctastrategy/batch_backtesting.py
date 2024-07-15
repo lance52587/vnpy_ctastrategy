@@ -74,14 +74,12 @@ class BatchBackTest:
                     "pricetick": all_priceticks[symbol]
                 }
 
-        # todo: 默认币的配置价格跳动和合约大小，而非要求用户配置在vt_symbol.json中
-
         # 股票品种
         for exchange in ('SSE', 'SZSE', 'BSE'):
             para[exchange] = {
                 "rate": 8.5e-5 if standard == 1 else 0.,
                 "slippage": 0.02 if standard == 1 else 0.,
-                "size": 100,
+                "size": 1,
                 "pricetick": 0.02
             }
         return para
@@ -306,7 +304,7 @@ class BatchBackTest:
         if daily_df_d is None:
             daily_df_d = self.daily_df_d
 
-        columns = ['date', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count']
+        columns = ['date', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count', 'end_holding']
         for k, v in daily_df_d.items():
             port_pnl = pd.DataFrame()
             for _k, _v in v.items():
@@ -323,6 +321,7 @@ class BatchBackTest:
                     port_pnl['slippage'] = port_pnl['slippage_x'] + port_pnl['slippage_y']
                     port_pnl['turnover'] = port_pnl['turnover_x'] + port_pnl['turnover_y']
                     port_pnl['trade_count'] = port_pnl['trade_count_x'] + port_pnl['trade_count_y']
+                    port_pnl['end_holding'] = port_pnl['end_holding_x'] + port_pnl['end_holding_y']
                     port_pnl = port_pnl[columns]
 
             # 统计资产组合pnl
@@ -339,6 +338,6 @@ class BatchBackTest:
 
 if __name__ == '__main__':
     bts = BatchBackTest()
-    # bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
+    bts.run_batch_test_file(agg_by='class_name')# agg_by='class_name' or 'vt_symbol' or 'setting' or 'all'
 
-    bts.summary_result_from_folder('outer_result')
+    # bts.summary_result_from_folder('outer_result')
