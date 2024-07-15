@@ -2,7 +2,7 @@
 import json, os
 import traceback
 from collections import defaultdict
-from datetime import datetime, date
+from datetime import datetime
 from pathlib import Path
 from types import MethodType
 import plotly.io as pio
@@ -63,7 +63,7 @@ class BatchBackTest:
         setting = {}
         for symbol in symbols:
             if symbol not in illiquid_symbol:
-                vt_symbol = f"{symbol}888.{all_symbol_pres_rev.get(symbol, 'LOCAL')}"
+                vt_symbol = f"{symbol}.{all_symbol_pres_rev.get(symbol, 'LOCAL')}"
                 setting[vt_symbol] = {
                     "rate": 2.5e-5 if standard == 1 else 0.,
                     "slippage": 2 * all_priceticks[symbol] if standard == 1 else 0.,
@@ -76,16 +76,19 @@ class BatchBackTest:
         """
         从vtSymbol.json文档读取品种的交易属性，比如费率，交易每跳，比率，滑点
         """
-        if vt_symbol in self.setting:
+        config_vt_symbol, exchange = vt_symbol.rsplit(".", 1)
+        config_vt_symbol = f"{config_vt_symbol.strip('0123456789')}.{exchange}"
+        if vt_symbol in self.setting or config_vt_symbol in self.setting:
+            _vt_symbol = vt_symbol if vt_symbol in self.setting else config_vt_symbol
             engine.set_parameters(
                 vt_symbol=vt_symbol,
                 interval=interval,
                 start=start_date,
                 end=end_date,
-                rate=self.setting[vt_symbol]["rate"],
-                slippage=self.setting[vt_symbol]["slippage"],
-                size=self.setting[vt_symbol]["size"],
-                pricetick=self.setting[vt_symbol]["pricetick"],
+                rate=self.setting[_vt_symbol]["rate"],
+                slippage=self.setting[_vt_symbol]["slippage"],
+                size=self.setting[_vt_symbol]["size"],
+                pricetick=self.setting[_vt_symbol]["pricetick"],
                 capital=self.capital if capital is None else capital
             )
         else:
@@ -258,6 +261,9 @@ class BatchBackTest:
         for k, v in self.daily_df_d.items():
             port_pnl = pd.DataFrame()
             for _k, _v in v.items():
+                # 对_v为NoneType时报错has no attribute reset_index的处理
+                if _v is None:
+                    continue
                 if port_pnl.empty:
                     port_pnl = _v.reset_index()[columns]
                 else:
