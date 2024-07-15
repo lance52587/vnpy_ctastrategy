@@ -229,8 +229,19 @@ class BatchBackTest:
 
         self.daily_dfs = {}
         for file in glob(f'{folder}/*.xlsx'):
-            df = pd.read_excel(file)
-            self.daily_dfs[os.path.basename(file).rsplit('.', 1)[0]] = df
+            df = pd.read_excel(file, index_col=0)
+            name = os.path.basename(file).rsplit('.', 1)[0]
+
+            if 'net_pnl' in df.columns:
+                engine = BacktestingEngine()
+                engine.daily_df = df
+                # stats：使用df进行计算
+                stat = engine.calculate_statistics(output=False)
+                stat['name'] = name
+                self.stats[name] = stat
+
+                # daily_dfs
+                self.daily_dfs[name] = engine.daily_df
         self.daily_view()
         self.save_result()
 
