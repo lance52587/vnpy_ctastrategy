@@ -13,7 +13,7 @@ import dill
 dill.settings['recurse'] = True
 import pandas as pd
 from vnpy.trader.utility import load_json, get_file_path
-from vnpy.utils.symbol_info import all_priceticks, illiquid_symbol, all_sizes, dbsymbols, all_symbol_pres_rev
+from symbol_info import all_priceticks, illiquid_symbol, all_sizes, dbsymbols, all_symbol_pres_rev
 
 from vnpy_ctastrategy.backtesting import BacktestingEngine
 from vnpy_ctastrategy.engine import CtaEngine
@@ -136,14 +136,12 @@ class BatchBackTest:
                 engine.run_backtesting()
                 engine.calculate_result()
                 stat = engine.calculate_statistics(output=False)
-                df = engine.daily_df
+                self.daily_dfs[_name] = engine.daily_df
                 stat["class_name"] = _config["class_name"]
                 stat["setting"] = str(_setting)
                 stat["vt_symbol"] = vt_symbol
                 stat['strategy_name'] = _name
-
                 self.stats[_name] = stat
-                self.daily_dfs[_name] = df
                 engine.clear_data()
 
     def run_single_test(self, vt_symbol, stra_setting_vt, start_date, end_date):
@@ -334,9 +332,9 @@ class BatchBackTest:
             engine.capital = self.capital * len(v)
             engine.daily_df = port_pnl
             port_stats = engine.calculate_statistics(output=False)
+            self.port_pnl[k] = engine.daily_df
             port_stats[self.agg_by] = k
             self.port_stats[k] = port_stats
-            self.port_pnl[k] = engine.daily_df
 
 
 if __name__ == '__main__':
