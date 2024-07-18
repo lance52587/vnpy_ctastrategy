@@ -343,8 +343,8 @@ class BacktestingEngine:
 
             df["highlevel"] = df["balance"].expanding().max()
             df["drawdown"] = df["balance"] - df["highlevel"]
-            if "end_holding" not in df.columns:
-                df['end_holding'] = (df['end_pos'] * df['close_price'] * self.size).abs()
+            # if "end_holding" not in df.columns:
+            #     df['end_holding'] = (df['end_pos'] * df['close_price'] * self.size).abs()
             df["ddpercent"] = df["drawdown"] / df["highlevel"] * 100
 
             # All balance value needs to be positive
@@ -384,7 +384,8 @@ class BacktestingEngine:
 
             total_turnover: float = df["turnover"].sum()
             daily_turnover: float = total_turnover / total_days
-            turnover_mul = daily_turnover / df['end_holding'].mean() * 252
+            # turnover_mul = daily_turnover / df['end_holding'].mean() * 252
+            turnover_mul = daily_turnover / self.capital * 252
 
             total_trade_count: int = df["trade_count"].sum()
             daily_trade_count: int = total_trade_count / total_days

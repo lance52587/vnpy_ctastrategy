@@ -304,7 +304,7 @@ class BatchBackTest:
         if daily_df_d is None:
             daily_df_d = self.daily_df_d
 
-        columns = ['date', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count', 'end_holding']
+        columns = ['date', 'net_pnl', 'commission', 'slippage', 'turnover', 'trade_count'] #, 'end_holding']
         for k, v in daily_df_d.items():
             port_pnl = pd.DataFrame()
             for _k, _v in v.items():
@@ -321,7 +321,7 @@ class BatchBackTest:
                     port_pnl['slippage'] = port_pnl['slippage_x'] + port_pnl['slippage_y']
                     port_pnl['turnover'] = port_pnl['turnover_x'] + port_pnl['turnover_y']
                     port_pnl['trade_count'] = port_pnl['trade_count_x'] + port_pnl['trade_count_y']
-                    port_pnl['end_holding'] = port_pnl['end_holding_x'] + port_pnl['end_holding_y']
+                    # port_pnl['end_holding'] = port_pnl['end_holding_x'] + port_pnl['end_holding_y']
                     port_pnl = port_pnl[columns]
 
             # 统计资产组合pnl
