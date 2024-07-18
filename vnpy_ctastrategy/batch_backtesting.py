@@ -80,7 +80,7 @@ class BatchBackTest:
                 "rate": 8.5e-5 if standard == 1 else 0.,
                 "slippage": 0.02 if standard == 1 else 0.,
                 "size": 1,
-                "pricetick": 0.02
+                "pricetick": 0.01
             }
         return para
 
