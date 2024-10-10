@@ -190,7 +190,7 @@ class BatchBackTest:
     def run_batch_test_file(self, para_dict="cta_strategy.xlsx", start_date=datetime(2024, 5, 1),
                          end_date=datetime(2024, 12, 1), agg_by='all'):
         """
-        从ctaStrategy.json去读交易策略和参数，进行回测
+        从ctaStrategy去读交易策略和参数，进行回测
         """
         if para_dict.endswith('.json'):
             stra_setting = load_json(para_dict)
