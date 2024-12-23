@@ -10,32 +10,33 @@ else:
 
 all_sizes = {'a': 10, 'ag': 15, 'al': 5, 'ao': 20, 'AP': 10, 'au': 1000, 'b': 10, 'bb': 500, 'bc': 5, 'br': 5, 'bu': 10,
              'c': 10, 'CF': 5, 'CJ': 5, 'cs': 10, 'cu': 5, 'CY': 5, 'eb': 5, 'ec': 50, 'eg': 10, 'fb': 10, 'FG': 20,
-             'fu': 10, 'hc': 10, 'i': 100, 'j': 100, 'jd': 10, 'jm': 60, 'JR': 20, 'l': 5, 'lc': 1, 'lh': 16, 'LR': 20,
-             'lu': 10, 'm': 10, 'MA': 10, 'ni': 1, 'nr': 10, 'OI': 10, 'p': 10, 'pb': 5, 'PF': 5, 'pg': 20, 'PK': 5,
-             'PM': 50, 'pp': 5, 'PX': 5, 'rb': 10, 'RI': 20, 'RM': 10, 'rr': 10, 'RS': 10, 'ru': 10, 'SA': 20,
-             'sc': 1000, 'sctas': 1000, 'SF': 5, 'SH': 30, 'si': 5, 'SM': 5, 'sn': 1, 'sp': 10, 'SR': 10, 'ss': 5,
-             'TA': 5, 'UR': 20, 'v': 5, 'WH': 20, 'wr': 10, 'y': 10, 'ZC': 100, 'zn': 5, 'IC': 200, 'IF': 300,
+             'fu': 10, 'hc': 10, 'i': 100, 'j': 100, 'jd': 10, 'jm': 60, 'JR': 20, 'l': 5, 'lc': 1, 'lg': 90, 'lh': 16,
+             'LR': 20, 'lu': 10, 'm': 10, 'MA': 10, 'ni': 1, 'nr': 10, 'OI': 10, 'p': 10, 'pb': 5, 'PF': 5, 'pg': 20,
+             'PK': 5, 'PM': 50, 'pp': 5, 'PR': 15, 'PX': 5, 'rb': 10, 'RI': 20, 'RM': 10, 'rr': 10, 'RS': 10, 'ru': 10,
+             'SA': 20, 'sc': 1000, 'sctas': 1000, 'SF': 5, 'SH': 30, 'si': 5, 'SM': 5, 'sn': 1, 'sp': 10, 'SR': 10,
+             'ss': 5, 'TA': 5, 'UR': 20, 'v': 5, 'WH': 20, 'wr': 10, 'y': 10, 'ZC': 100, 'zn': 5, 'IC': 200, 'IF': 300,
              'IH': 300, 'IM': 200, 'T': 10000, 'TF': 10000, 'TS': 20000, 'TL': 10000, 'BTCUSDT': 1, 'ETHUSDT': 1}
 
 all_priceticks = {'a': 1.0, 'ag': 1.0, 'al': 5.0, 'ao': 1.0, 'AP': 1.0, 'au': 0.02, 'b': 1.0, 'bb': 0.05, 'bc': 10.0,
                   'br': 5.0, 'bu': 1.0, 'c': 1.0, 'CF': 5.0, 'CJ': 5.0, 'cs': 1.0, 'cu': 10.0, 'CY': 5.0, 'eb': 1.0,
                   'ec': 0.1, 'eg': 1.0, 'fb': 0.5, 'FG': 1.0, 'fu': 1.0, 'hc': 1.0, 'i': 0.5, 'j': 0.5, 'jd': 1.0,
-                  'jm': 0.5, 'JR': 1.0, 'l': 1.0, 'lc': 50.0, 'lh': 5.0, 'LR': 1.0, 'lu': 1.0, 'm': 1.0, 'MA': 1.0,
-                  'ni': 10.0, 'nr': 5.0, 'OI': 1.0, 'p': 2.0, 'pb': 5.0, 'PF': 2.0, 'pg': 1.0, 'PK': 2.0, 'PM': 1.0,
-                  'pp': 1.0, 'PX': 2.0, 'rb': 1.0, 'RI': 1.0, 'RM': 1.0, 'rr': 1.0, 'RS': 1.0, 'ru': 5.0, 'SA': 1.0,
-                  'sc': 0.1, 'sctas': 0.1, 'SF': 2.0, 'SH': 1.0, 'si': 5.0, 'SM': 2.0, 'sn': 10.0, 'sp': 2.0, 'SR': 1.0,
-                  'ss': 5.0, 'TA': 2.0, 'UR': 1.0, 'v': 1.0, 'WH': 1.0, 'wr': 1.0, 'y': 2.0, 'ZC': 0.2, 'zn': 5.0,
-                  'IC': 0.2, 'IF': 0.2, 'IH': 0.2, 'IM': 0.2, 'T': 0.005, 'TF': 0.005, 'TS': 0.002, 'TL': 0.01,
+                  'jm': 0.5, 'JR': 1.0, 'l': 1.0, 'lc': 20.0, 'lg': 0.5, 'lh': 5.0, 'LR': 1.0, 'lu': 1.0, 'm': 1.0,
+                  'MA': 1.0, 'ni': 10.0, 'nr': 5.0, 'OI': 1.0, 'p': 2.0, 'pb': 5.0, 'PF': 2.0, 'pg': 1.0, 'PK': 2.0,
+                  'PM': 1.0, 'pp': 1.0, 'PR': 2.0, 'PX': 2.0, 'rb': 1.0, 'RI': 1.0, 'RM': 1.0, 'rr': 1.0, 'RS': 1.0,
+                  'ru': 5.0, 'SA': 1.0, 'sc': 0.1, 'sctas': 0.1, 'SF': 2.0, 'SH': 1.0, 'si': 5.0, 'SM': 2.0, 'sn': 10.0,
+                  'sp': 2.0, 'SR': 1.0, 'ss': 5.0, 'TA': 2.0, 'UR': 1.0, 'v': 1.0, 'WH': 1.0, 'wr': 1.0, 'y': 2.0,
+                  'ZC': 0.2, 'zn': 5.0, 'IC': 0.2, 'IF': 0.2, 'IH': 0.2, 'IM': 0.2, 'T': 0.005, 'TF': 0.005,
+                  'TS': 0.002, 'TL': 0.01,
                   'BTCUSDT': 0.1, 'ETHUSDT': 0.01}
 
 all_symbol_pres = {
-    'DCE': ['a', 'b', 'bb', 'c', 'cs', 'eb', 'eg', 'fb', 'i', 'j', 'jd', 'jm', 'l', 'lh', 'm', 'p', 'pg', 'pp', 'rr',
-            'v', 'y'],
+    'DCE': ['a', 'b', 'bb', 'c', 'cs', 'eb', 'eg', 'fb', 'i', 'j', 'jd', 'jm', 'l', 'lg', 'lh', 'm', 'p', 'pg', 'pp',
+            'rr', 'v', 'y'],
     'SHFE': ['ag', 'al', 'ao', 'au', 'br', 'bu', 'cu', 'fu', 'hc', 'ni', 'pb', 'rb', 'ru', 'sn', 'sp', 'ss', 'wr',
              'zn'],
-    'CZCE': ['AP', 'CF', 'CJ', 'CY', 'FG', 'JR', 'LR', 'MA', 'OI', 'PF', 'PK', 'PM', 'PX', 'RI', 'RM', 'RS', 'SA', 'SF',
-             'SH', 'SM', 'SR', 'TA', 'UR', 'WH', 'ZC'], 'INE': ['bc', 'ec', 'lu', 'nr', 'sc', 'sctas'],
-    'GFEX': ['lc', 'si'], 'CFFEX': ['IC', 'IF', 'IH', 'IM', 'T', 'TF', 'TL', 'TS'], 'BINANCE': ['BTCUSDT', 'ETHUSDT'],}
+    'CZCE': ['AP', 'CF', 'CJ', 'CY', 'FG', 'JR', 'LR', 'MA', 'OI', 'PF', 'PK', 'PM', 'PR', 'PX', 'RI', 'RM', 'RS', 'SA',
+             'SF', 'SH', 'SM', 'SR', 'TA', 'UR', 'WH', 'ZC'], 'INE': ['bc', 'ec', 'lu', 'nr', 'sc', 'sctas'],
+    'GFEX': ['lc', 'si'], 'CFFEX': ['IC', 'IF', 'IH', 'IM', 'T', 'TF', 'TS', 'TL'], 'BINANCE': ['BTCUSDT', 'ETHUSDT']}
 
 all_symbols = [symbol for exchange in all_symbol_pres.values() for symbol in exchange]
 
@@ -45,13 +46,13 @@ illiquid_symbol = ['JR', 'LR', 'PM', 'RI', 'RS', 'WH', 'WT', 'T', 'TF', 'TS', 'b
 dbsymbols = ['a', 'ag', 'al', 'AP', 'au', 'b', 'bb', 'bc', 'bu', 'c', 'CF', 'CJ', 'cs', 'cu', 'CY', 'eb', 'eg', 'fb',
              'FG', 'fu', 'hc', 'i', 'IC', 'IF', 'IH', 'IM', 'j', 'jd', 'jm', 'JR', 'l', 'lc', 'lh', 'LR', 'lu', 'm',
              'MA', 'ni', 'nr', 'OI', 'p', 'pb', 'PF', 'pg', 'PK', 'PM', 'pp', 'rb', 'RI', 'RM', 'rr', 'RS', 'ru', 'SA',
-             'sc', 'SF', 'si', 'SM', 'sn', 'sp', 'SR', 'ss', 'T', 'TA', 'TF', 'TL', 'TS', 'UR', 'v', 'WH', 'wr', 'y', 'ZC',
-             'zn', 'ao', 'br', 'ec', 'PX', 'SH', 'BTCUSDT', 'ETHUSDT']
+             'sc', 'SF', 'si', 'SM', 'sn', 'sp', 'SR', 'ss', 'T', 'TA', 'TF', 'TL', 'TS', 'UR', 'v', 'WH', 'wr', 'y',
+             'ZC', 'zn', 'ao', 'br', 'ec', 'PX', 'SH', 'PR', 'lg', 'BTCUSDT', 'ETHUSDT']
 
 ind_symbol = {'black': ['ZC', 'jm', 'j', 'i', 'rb', 'hc', 'SM', 'SF', 'wr'],
               'agrictural': ['a', 'b', 'PK', 'm', 'y', 'p', 'RM', 'OI', 'SR', 'CF', 'CY', 'jd', 'lh', 'c', 'cs', 'AP',
                              'CJ', 'rr', 'RI', 'JR', 'LR', 'WH', 'PM', 'RS'],
-              'energy': ['eg', 'sc', 'bu', 'sp', 'SA', 'FG', 'l', 'MA', 'pp', 'eb', 'nr', 'UR', 'ru', 'fu', 'bb', 'fb',
+              'energy': ['eg', 'PR', 'sc', 'bu', 'sp', 'lg', 'SA', 'FG', 'l', 'MA', 'pp', 'eb', 'nr', 'UR', 'ru', 'fu', 'bb', 'fb',
                          'v', 'PF', 'TA', 'lu', 'pg', 'br', 'PX', 'SH', 'ec'],
               'colored': ['cu', 'al', 'zn', 'pb', 'ni', 'sn', 'ss', 'bc', 'au', 'ag', 'ao', 'si', 'lc'],
               'stkind': ['IC', 'IF', 'IH', 'IM'], 'debt': ['TS', 'TF', 'T', 'TL'], }
@@ -63,10 +64,10 @@ liquid_ind_symbol = {i: [j for j in ind_symbol[i] if j in dbsymbols and j not in
 
 trading_hours = {
     0: ['AP', 'CJ', 'JR', 'LR', 'PK', 'PM', 'RI', 'RS', 'SF', 'SM', 'UR', 'WH', 'bb', 'ec', 'fb', 'jd', 'lc', 'lh',
-        'si', 'wr'],  # 0：白盘品种
+        'si', 'wr', 'lg'],  # 0：白盘品种
     1: ['CF', 'CY', 'FG', 'MA', 'OI', 'PF', 'PX', 'RM', 'SA', 'SH', 'SR', 'TA', 'ZC', 'a', 'b', 'br', 'bu', 'c', 'cs',
         'eb', 'eg', 'fu', 'hc', 'i', 'j', 'jm', 'l', 'lu', 'm', 'nr', 'p', 'pg', 'pp', 'rb', 'rr', 'ru', 'sp', 'v',
-        'y'],  # 1：夜盘到23点品种
+        'y', 'PR'],  # 1：夜盘到23点品种
     2: ['al', 'ao', 'bc', 'cu', 'ni', 'pb', 'sn', 'sn', 'ss', 'zn'],  # 2：夜盘到凌晨1点品种
     3: ['ag', 'au', 'sc'],  # 3：夜盘到凌晨2点30分品种
     4: ['T', 'TF', 'TL', 'TS'],  # 4：9:30-11:30,13:00-15:15
